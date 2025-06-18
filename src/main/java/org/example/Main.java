@@ -1,17 +1,33 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import com.mongodb.client.*;
+import org.bson.Document;
+
+
+import static com.mongodb.client.model.Filters.*;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        // Connect to MongoDB
+        MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+        MongoDatabase database = mongoClient.getDatabase("library");
+        MongoCollection<Document> collection = database.getCollection("books");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        // Create books
+        FictionBook fiction = new FictionBook("Harry Potter", "J.K. Rowling", "1234567890", "Fantasy");
+        NonFictionBook nonfiction = new NonFictionBook("Sapiens", "Yuval Noah Harari", "9876543210", "History");
+
+        // Insert into MongoDB
+        collection.insertOne(fiction.toDocument());
+        collection.insertOne(nonfiction.toDocument());
+
+        // Retrieve and display all books
+        System.out.println("\n--- Books from MongoDB ---\n");
+        FindIterable<Document> books = collection.find();
+        for (Document doc : books) {
+            System.out.println(doc.toJson());
         }
+
+        mongoClient.close();
     }
 }
